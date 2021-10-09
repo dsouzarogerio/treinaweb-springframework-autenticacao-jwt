@@ -11,10 +11,8 @@ import javax.validation.constraints.Size;
 
 import br.com.treinaweb.javajobs.enums.Status;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class JobDTO {
@@ -40,5 +38,53 @@ public class JobDTO {
     @NotNull
     @Enumerated(EnumType.STRING)
     private Status status;
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getCompany() {
+		return company;
+	}
+
+	public void setCompany(String company) {
+		this.company = company;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public Set<String> getTechs() {
+		return techs;
+	}
+
+	public void setTechs(Set<String> techs) {
+		this.techs = techs;
+	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
 
 }
