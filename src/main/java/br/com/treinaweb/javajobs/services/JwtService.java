@@ -88,6 +88,17 @@ public class JwtService {
 	}
 	
 	/**
+	 * Método para captura do usuário contido no Token
+	 * 
+	 * @param token
+	 * @return
+	 */
+	public String getUsernameFromToken(String token) {
+		Claims claims = getClaims(token);
+		return claims.getSubject();
+	}
+	
+	/**
 	 * Método privado para decodificação do Token
 	 * 
 	 * .parser() 					=> inicio da decodificação

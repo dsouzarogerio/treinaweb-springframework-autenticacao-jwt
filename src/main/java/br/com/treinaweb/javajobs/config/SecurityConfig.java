@@ -12,7 +12,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import br.com.treinaweb.javajobs.filters.JwtRequestFilter;
 import br.com.treinaweb.javajobs.services.AuthenticationService;
 
 /**
@@ -31,6 +33,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private AuthenticationService authenticationService;
 	
+	//adição do filtro customizado para execução no FilterChain
+	@Autowired
+	private JwtRequestFilter jwtRequestFilter;
+	
 	//metodo relacionado a autorização da aplicação
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -48,6 +54,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		//configuração para desabiltiar sessão da aplicação, para possibilitar a configuração/uso de token
 		http.sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS); //não vai guardar estado da sessão	
+		
+		//execução do jwtRequestFilter antes da execução do UsernamePasswordAuthenticationFilter
+		http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 	
 	//informando ao SpringSecuirty a classe que implementa o serviço de autenticação 
