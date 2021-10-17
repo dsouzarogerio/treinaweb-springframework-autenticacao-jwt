@@ -19,7 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import br.com.treinaweb.javajobs.services.JwtService;
 
 /**
- * Filtro para validar e buscar o usuário do Token
+ * Filtro para validar e buscar o usuário dentro do Token
  * 
  * @author dsouzarogerio
  *
@@ -57,9 +57,11 @@ public class JwtRequestFilter extends OncePerRequestFilter  {
 		}
 		//caso não tenha usuário no contexto, obtenho o usuário e coloco no contexto do Spring
 		if(isUsernameNotInContext(username)) {
+			//chamada do método para adição do usuário no contexto do Spring Security
 			addUsernameInContext(request, username, token);
 		}
-		//chamar o método com o filtro especifico e passando a execução para os próximos filtros do FilterChain
+		// Método para execução do JwtRequestFilter
+		// e passar a execução para os próximos filtros do FilterChain
 		filterChain.doFilter(request, response);
 	}
 	
@@ -74,7 +76,8 @@ public class JwtRequestFilter extends OncePerRequestFilter  {
 	}
 	
 	/**
-	 * Método privado para verificar se o contexto do Spring está com o usuário vazio
+	 * Método privado para verificar se o usuário encontrado 
+	 * no Token já está presente no contexto do Spring Security
 	 *  
 	 * @param username
 	 * @return
@@ -84,7 +87,11 @@ public class JwtRequestFilter extends OncePerRequestFilter  {
 	}
 	
 	/**
-	 * Método privado para adição do usuário no contexto do Spring
+	 * Caso o usuário não esteja presente 
+	 * no contexto do Spring Security, este 
+	 * método será chamado para adicionar 
+	 * o usuário no contexto do Spring
+	 * 
 	 */
 	private void addUsernameInContext(HttpServletRequest request, String username, String token) {
 		//1. buscar usuário no banco
