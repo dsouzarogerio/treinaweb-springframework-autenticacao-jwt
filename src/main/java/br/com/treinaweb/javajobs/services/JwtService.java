@@ -22,7 +22,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class JwtService {
 	
 	/**
-	 * Constante SIGNIN_KEY => Chave de assinatura do token JWT
+	 * Constantes SIGNIN_KEY => Chave de assinatura do token JWT
 	 * IMPORTANTE!!!
 	 * Não faça essa atribuição em produção
 	 * Geralmente esta chave é configurada como variavel 
@@ -33,69 +33,122 @@ public class JwtService {
 	private static final String SIGNIN_KEY = "MSulvPs9su0wm1RghtIK8kFE1fLGkXXw";
 	private static final int EXPIRATION_TIME = 30;
 	
+	/**
+	 * Constante SIGNIN_KEY_REFRESH => Chave de assinatura do token JWT
+	 * IMPORTANTE!!!
+	 * Garanta que o valor da SIGNIN_KEY_REFRESH 
+	 * seja diferente da SIGNIN_KEY
+	 * 
+	 * Constante REFRESH_EXPIRATION_TIME => Tempo de duração do token JWT
+	 */
+	private static final String REFRESH_SIGNIN_KEY = "VMZ7kJajrz9ScEl1w0XJo4LZEYsn37xP";
+	private static final int REFRESH_EXIRATION_TIME = 60;
+	
 
 	/**
 	 * 
 	 * Método responsável por gerar o Token JWT
-	 * 
-	 * Passo-a-passo:
-	 * 1. Implementação de HashMap com as claims 
-	 * 	  claims => são dados criptografados no TOKEN JWT
-	 * 2. currenteDate => data atual do Token
-	 * 3. expirationDate => período de expiração do TOKEN
-	 * 4. Geração do TOKEN
+	 * retornando a chamada do metodo generateToken 
+	 * com os parametros correspondentes ao Token
 	 * 
 	 * @param authentication
 	 * @return
 	 */
 	public String generateToken(Authentication authentication) {
-		//1. Implmentação chave e valor das claims
-		Map<String, Object> claims = new HashMap<>();
-		
-		//2. Data atual
-		Instant currentDate = Instant.now();
-		//3. Período de expiração do Token
-		Instant expirationDate = currentDate.plusSeconds(EXPIRATION_TIME);
-		
-		/**
-		 * 4.  Gerando de fato o Token utilizando a classe JWTS
-		 * 
-		 * .setClaims 		=> 	inicia configuração do claim
-		 * .setSubject 		=> 	configura o usuario representado pelo token
-		 * .setIssuedAt() 	=> 	configura a data em que o Token foi gerado
-		 * .setExpiration() => 	configura o período de expiração do Token
-		 * .signWith() 		=> 	informação da chave de assinatura, recebe os parametros de algoritmo e chave
-		 * .compact() 		=> 	compacta todos os dados e gera o Token Jwt
-		 */
-		return Jwts.builder()
-				.setClaims(claims)
-				.setSubject(authentication.getName())
-				.setIssuedAt(new Date(currentDate.toEpochMilli()))
-				.setExpiration(new Date(expirationDate.toEpochMilli()))
-				.signWith(SignatureAlgorithm.HS512, SIGNIN_KEY)
-				.compact();
+		return generateToken(SIGNIN_KEY, authentication.getName(), EXPIRATION_TIME);
 	}
 	
 	/**
-	 * Método para receber o Token e o periodo de sua expiração
+	 * Método de geração do refreshToken
+	 * 
+	 * retorno com a chamada do método generateToken 
+	 * com os parametros correspondentes ao refreshToken
+	 * 
+	 * @param username
+	 */
+	public String generateRefreshToken(String username) {
+		return generateToken(REFRESH_SIGNIN_KEY, username, REFRESH_EXIRATION_TIME);
+	}
+	
+	/**
+	 * Método para receber o Token 
+	 * e o periodo de sua expiração
 	 * 
 	 * @param token
 	 * @return
 	 */
 	public Date getExpirationFromToken(String token) {
-		Claims claims = getClaims(token);
+		Claims claims = getClaims(token, SIGNIN_KEY);
 		return claims.getExpiration();
 	}
 	
 	/**
-	 * Método para captura do usuário contido no Token
+	 * Método para captura do usuário 
+	 * que está dentro do Token
 	 * 
 	 * @param token
 	 * @return
 	 */
 	public String getUsernameFromToken(String token) {
-		Claims claims = getClaims(token);
+		Claims claims = getClaims(token, SIGNIN_KEY);
 		return claims.getSubject();
+	}
+	
+	/**
+	 * Método que captura o usuario 
+	 * que está dentro do refreshToken
+	 * 
+	 * @param refreshToken
+	 * @return
+	 */
+	public String getUsernameFromRefreshToken(String refreshToken) {
+		Claims claims = getClaims(refreshToken, REFRESH_SIGNIN_KEY);
+		return claims.getSubject();
+	}
+	
+	/**
+	 * 
+	 * Método privado para gerar o Token JWT
+	 * 
+	 * Passo-a-passo:
+	 * 
+	 * 1. Implementação de HashMap com as claims 
+	 * 	  claims => são dados criptografados no TOKEN JWT
+	 * 2. currenteDate => data atual do Token
+	 * 3. expirationDate => período de expiração do TOKEN
+	 * 4. Gerando de fato o TOKEN:
+	 * 		A -> .setClaims => inicia configuração do claim 
+		 * 	B -> .setSubject => configura o usuario representado pelo token 
+		 * 	C -> .setIssuedAt() => configura a data em que o Token foi gerado 
+		 * 	D -> .setExpiration() => configura o período de expiração do Token
+		 * 	E -> .signWith() => informação da chave de assinatura, 
+		 * 		  recebe os parametros dealgoritmo e chave 
+		 * 	F -> .compact() => compacta todos os dados e gera o Token Jwt
+		 * 
+	 * @param signinkey
+	 * @param subject
+	 * @param expirationTime
+	 * @return 
+	 */
+	private String generateToken(String signinkey, String subject, int expirationTime) {
+		
+		// 1. Implmentação chave e valor das claims
+		Map<String, Object> claims = new HashMap<>();
+
+		// 2. Data atual
+		Instant currentDate = Instant.now();
+		
+		// 3. Período de expiração do Token
+		Instant expirationDate = currentDate.plusSeconds(expirationTime);
+
+		 // 4. Gerando de fato o Token utilizando a classe JWTS
+		return Jwts.builder()
+				.setClaims(claims)
+				.setSubject(subject)
+				.setIssuedAt(new Date(currentDate.toEpochMilli()))
+				.setExpiration(new Date(expirationDate.toEpochMilli()))
+				.signWith(SignatureAlgorithm.HS512, signinkey)
+				.compact();
 	}
 	
 	/**
@@ -110,9 +163,9 @@ public class JwtService {
 	 * @param token
 	 * @return
 	 */
-	private Claims getClaims(String token) {
+	private Claims getClaims(String token, String signinkey) {
 		return Jwts.parser()
-				.setSigningKey(SIGNIN_KEY)
+				.setSigningKey(signinkey)
 				.parseClaimsJws(token)
 				.getBody();
 	}

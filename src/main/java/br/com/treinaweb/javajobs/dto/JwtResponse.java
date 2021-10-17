@@ -8,6 +8,7 @@ import java.util.Date;
  * @author dsouzarogerio
  *
  */
+
 public class JwtResponse {
 	
 	private String token;
@@ -15,13 +16,16 @@ public class JwtResponse {
 	private String type;
 	
 	private Date expiresAt;
+	
+	private String refreshToken;
 
 	public JwtResponse() {	}
 
-	public JwtResponse(String token, String type, Date expiresAt) {
+	public JwtResponse(String token, String type, Date expiresAt, String refreshToken) {
 		this.token = token;
 		this.type = type;
 		this.expiresAt = expiresAt;
+		this.refreshToken = refreshToken;
 	}
 
 	public String getToken() {
@@ -47,4 +51,13 @@ public class JwtResponse {
 	public void setExpiresAt(Date expiresAt) {
 		this.expiresAt = expiresAt;
 	}
+
+	public String getRefreshToken() {
+		return refreshToken;
+	}
+
+	public void setRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
+	}
+	
 }

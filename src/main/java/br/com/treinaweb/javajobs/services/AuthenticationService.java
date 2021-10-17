@@ -48,7 +48,7 @@ public class AuthenticationService implements UserDetailsService {
 	 * 2. UsernamePasswordAuthenticationToken => Validação das credenciais do usuario 
 	 * 											 a ser autenticado
 	 * 3. Authentication => Autenticação das credenciais do usuario
-	 * 4. Gera de fato o JWTResponse através do JWTService que gerencia e gera o TOKEN
+	 * 4. 
 	 * 
 	 * @param userDTO
 	 * @return
@@ -65,10 +65,40 @@ public class AuthenticationService implements UserDetailsService {
 		//3. Autenticação de fato do usuário
 		Authentication authenticatedUser = authenticationManager.authenticate(authentication);
 		
-		//4. Gerando de fato o JWT
-		String token = jwtService.generateToken(authenticatedUser);
-		Date expiresAt = jwtService.getExpirationFromToken(token);
+		return createJwtResponse(authenticatedUser);
 		
-		return new JwtResponse(token, "Bearer", expiresAt);
+	}
+
+	/**
+	 * Método que recebe o refreshToken, 
+	 * que deve capturar o usuário ao qual ele faz parte
+	 * 
+	 * @param refreshToken
+	 * @return
+	 */
+	public JwtResponse createJwtResponse(String refreshToken) {
+		//1. busca o usuario do refreshToken
+		String username = jwtService.getUsernameFromRefreshToken(refreshToken);
+		//2. carrega a senha deste usuario
+		String password = loadUserByUsername(username).getPassword();
+		//3. instancio o usuario já autenticado no sistema
+		Authentication authenticatedUser = new UsernamePasswordAuthenticationToken(username, password);
+
+		return createJwtResponse(authenticatedUser);
+		
+	}
+	/**
+	 * Método que gera de fato o JWTResponse através do JWTService 
+	 * que gerencia e gera o TOKEN
+	 * 
+	 * @param authentication
+	 * @return
+	 */
+	private JwtResponse createJwtResponse(Authentication authentication) {
+		String token = jwtService.generateToken(authentication);
+		Date expiresAt = jwtService.getExpirationFromToken(token);
+		String refreshToken = jwtService.generateRefreshToken(authentication.getName());
+		
+		return new JwtResponse(token, "Bearer", expiresAt, refreshToken);
 	}
 }
